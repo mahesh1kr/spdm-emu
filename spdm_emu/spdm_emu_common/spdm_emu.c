@@ -35,6 +35,7 @@ void print_usage(const char *name)
 {
     printf("\n%s [--trans MCTP|PCI_DOE|TCP|NONE]\n", name);
     printf("   [--tcp_sub HS|NO_HS]\n");
+    printf("   [--ip <IP Address>]\n");
     printf("   [--ver 1.0|1.1|1.2]\n");
     printf("   [--sec_ver 1.0|1.1]\n");
     printf(
@@ -494,6 +495,32 @@ void process_args(char *program_name, int argc, char *argv[])
                 continue;
             } else {
                 printf("invalid --tcp_sub\n");
+                print_usage(program_name);
+                exit(0);
+            }
+        }
+
+        if (strcmp(argv[0], "--ip") == 0) {
+            if (argc >= 2) {
+#ifdef _MSC_VER
+                WSADATA ws;
+                if (WSAStartup(MAKEWORD(2, 2), &ws) != 0) {
+                    printf("WSAStartup failed with error: %x\n", WSAGetLastError());
+                    print_usage(program_name);
+                    exit(0);
+                }
+#endif    
+                if(inet_pton(AF_INET, argv[1], &m_ip_address) != 1) {
+                    printf("failed converting ip address\n");
+                    print_usage(program_name);
+                    exit(0);
+                }
+                
+                argc -= 2;
+                argv += 2;
+                continue;
+            } else {
+                printf("invalid --ip\n");
                 print_usage(program_name);
                 exit(0);
             }
